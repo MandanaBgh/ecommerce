@@ -33,6 +33,10 @@ export class ProductService {
     return this.getProducts(seachUrl);
   }
 
+  getProduct(theProductId: string): Observable<Product> {
+    const seachUrl = `${this.baseURL}/${theProductId}`;
+    return this.httpClient.get<Product>(seachUrl);
+  }
 
 
   private getProducts(seachUrl: string): Observable<Product[]> {
