@@ -13,7 +13,11 @@ export class ProductListComponent implements OnInit {
   products!: Product[];
   currentCategoryId!: number;
   searchword!: boolean;
-
+  thePageSize: number = 5;
+  thePageNumber: number = 1;
+  theTotalElements: number = 1;
+  thePreviuosCategory: number = 1;
+  previousWord: string = "";
   constructor(private theProductService: ProductService,
     private route: ActivatedRoute) { }
 
@@ -41,12 +45,12 @@ export class ProductListComponent implements OnInit {
   handleSearchWord() {
 
     const thekeyword: string = String(this.route.snapshot.paramMap.get('keyword'));
-
-    this.theProductService.searchProductList(thekeyword).subscribe(
-      data => {
-        this.products = data;
-      }
-    );
+    if (this.previousWord != thekeyword) {
+      this.thePageNumber = 1;
+    }
+    this.previousWord = thekeyword;
+    this.theProductService.searchProductPaginate(this.thePageNumber - 1,
+      this.thePageSize, thekeyword).subscribe(this.proccessList());
 
   }
 
@@ -61,11 +65,29 @@ export class ProductListComponent implements OnInit {
       this.currentCategoryId = 1;
     }
 
-    this.theProductService.getProductList(this.currentCategoryId).subscribe(
-      data => {
-        this.products = data;
-      }
-    );
+
+    if (this.thePreviuosCategory != this.currentCategoryId) {
+      this.thePageNumber = 1;
+    }
+
+    this.theProductService.getProductListPaginate(this.thePageNumber - 1,
+      this.thePageSize, this.currentCategoryId).subscribe(this.proccessList());
 
   }
+
+  proccessList() {
+    return (data: { _embedded: { products: Product[]; }; page: { number: number; size: number; totalElements: number; }; }) => {
+      this.products = data._embedded.products,
+        this.thePageNumber = data.page.number + 1,
+        this.thePageSize = data.page.size,
+        this.theTotalElements = data.page.totalElements
+    }
+  }
+
+  updatePageSize(pageSize: number) {
+    this.thePageSize = pageSize;
+    this.thePageNumber = 1;
+    this.ProductList();
+  }
+
 }
