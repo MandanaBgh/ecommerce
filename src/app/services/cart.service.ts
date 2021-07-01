@@ -9,6 +9,7 @@ import { CartItem } from '../common/cart-item';
 export class CartService {
 
 
+
   cartItems: CartItem[] = [];
   totalPrice: Subject<number> = new Subject<number>();
   totalQuantity: Subject<number> = new Subject<number>();
@@ -59,5 +60,22 @@ export class CartService {
       console.log(`${theItems.quantity} ---- ${theItems.quantity} --- ${sumOfItems}`);
     }
     console.log(`${totalPriceValue} ===== ${totalQuantityValue}`);
+  }
+
+
+  removefromcart(thecartItem: CartItem) {
+    thecartItem.quantity--;
+    if (thecartItem.quantity === 0) {
+      this.remove(thecartItem);
+    } else {
+      this.computeCartTotals();
+    }
+  }
+  remove(thecartItem: CartItem) {
+    const ItemIndex = this.cartItems.findIndex(tempCartItem => tempCartItem.id === thecartItem.id);
+    if (ItemIndex > -1) {
+      this.cartItems.splice(ItemIndex, 1);
+      this.computeCartTotals();
+    }
   }
 }
