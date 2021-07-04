@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { Country } from 'src/app/common/country';
+import { State } from 'src/app/common/state';
 import { FormService } from 'src/app/services/form.service';
 
 @Component({
@@ -9,12 +11,14 @@ import { FormService } from 'src/app/services/form.service';
 })
 export class CheckoutComponent implements OnInit {
   currentYear: number = Number(new Date().getFullYear());
-
+  shippingAddressStates: State[] = [];
+  billingAddressStates: State[] = [];
   creditCardYear: number[] = [];
   creditCardMonth: number[] = [];
   totalPrice: number = 0;
   totalQuantity: number = 0;
   checkoutFormGroup: FormGroup;
+  countries: Country[] = [];
   constructor(private theFormBuilder: FormBuilder,
     private theFormService: FormService) { }
 
@@ -58,6 +62,12 @@ export class CheckoutComponent implements OnInit {
 
     this.getNextMonths(Number(new Date().getMonth()) + 1);
 
+    this.theFormService.getCountries().subscribe(
+      data => {
+        this.countries = data;
+      }
+    )
+
   }
   onSubmit() {
     console.log("The Data On Submit Form");
@@ -70,8 +80,10 @@ export class CheckoutComponent implements OnInit {
     if (event.target.checked) {
       this.checkoutFormGroup.controls.billingAddress
         .setValue(this.checkoutFormGroup.controls.shippingAddress.value);
+      this.billingAddressStates = this.shippingAddressStates;
     } else {
       this.checkoutFormGroup.controls.billingAddress.reset();
+      this.billingAddressStates = [];
     }
   }
   onChangeYear() {
@@ -101,5 +113,29 @@ export class CheckoutComponent implements OnInit {
         this.creditCardMonth = data;
       }
     );
+  }
+
+
+  getState(formGroupName: string) {
+
+    const FormGroup = this.checkoutFormGroup.get(formGroupName);
+    const FormGroupCountryCode = FormGroup.value.country.code;
+    this.theFormService.getStates(FormGroupCountryCode).subscribe(
+      data => {
+
+
+        if (formGroupName === 'billingAddress') {
+          this.billingAddressStates = data;
+        } else {
+          this.shippingAddressStates = data;
+        }
+        FormGroup.get('state').setValue(data[0]);
+
+      }
+
+
+
+    )
+
   }
 }
