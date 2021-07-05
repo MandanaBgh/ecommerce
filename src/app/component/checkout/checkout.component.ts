@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
 import { FormService } from 'src/app/services/form.service';
@@ -26,9 +26,9 @@ export class CheckoutComponent implements OnInit {
 
     this.checkoutFormGroup = this.theFormBuilder.group({
       customer: this.theFormBuilder.group({
-        firstName: [''],
-        lastName: [''],
-        email: ['']
+        firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+        lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+        email: new FormControl('', [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')])
       }),
       shippingAddress: this.theFormBuilder.group({
         country: [''],
@@ -73,8 +73,14 @@ export class CheckoutComponent implements OnInit {
     console.log("The Data On Submit Form");
     console.log(this.checkoutFormGroup.get('customer').value);
     console.log("the EmailAddress is :" + this.checkoutFormGroup.get('customer').value.email);
-  }
+    if (this.checkoutFormGroup.invalid) {
+      this.checkoutFormGroup.markAllAsTouched();
+    }
 
+  }
+  get firstName() { return this.checkoutFormGroup.get('customer.firstName'); }
+  get lastName() { return this.checkoutFormGroup.get('customer.lastName'); }
+  get email() { return this.checkoutFormGroup.get('customer.email'); }
 
   cpShipngToBilling(event) {
     if (event.target.checked) {
