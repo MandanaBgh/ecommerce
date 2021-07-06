@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Country } from 'src/app/common/country';
 import { State } from 'src/app/common/state';
 import { FormService } from 'src/app/services/form.service';
-
+import { CartService } from 'src/app/services/cart.service';
 @Component({
   selector: 'app-checkout',
   templateUrl: './checkout.component.html',
@@ -20,7 +20,8 @@ export class CheckoutComponent implements OnInit {
   checkoutFormGroup: FormGroup;
   countries: Country[] = [];
   constructor(private theFormBuilder: FormBuilder,
-    private theFormService: FormService) { }
+    private theFormService: FormService,
+    private thecartService: CartService) { }
 
   ngOnInit(): void {
 
@@ -52,6 +53,7 @@ export class CheckoutComponent implements OnInit {
         expirationMonth: [''],
         expirationYear: ['']
       })
+
     });
 
     this.theFormService.getCreditCardYears().subscribe(
@@ -67,7 +69,7 @@ export class CheckoutComponent implements OnInit {
         this.countries = data;
       }
     )
-
+    this.updateCheckOut();
   }
   onSubmit() {
     console.log("The Data On Submit Form");
@@ -91,6 +93,17 @@ export class CheckoutComponent implements OnInit {
       this.checkoutFormGroup.controls.billingAddress.reset();
       this.billingAddressStates = [];
     }
+  }
+
+  updateCheckOut() {
+    this.thecartService.totalQuantity.subscribe(
+      totalQuantity => this.totalQuantity = totalQuantity
+    );
+
+    this.thecartService.totalPrice.subscribe(
+      totalPrice => this.totalPrice = totalPrice
+    );
+
   }
   onChangeYear() {
 
